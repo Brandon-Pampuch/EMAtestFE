@@ -9,7 +9,7 @@ export const Auth0Context = React.createContext();
 export const useAuth0 = () => useContext(Auth0Context);
 export const Auth0Provider = ({
     children,
-    onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
+    onRedirectCallback = "https://pensive-poitras-9c5175.netlify.com/",
     ...initOptions
 }) => {
     const [isAuthenticated, setIsAuthenticated] = useState();
