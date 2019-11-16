@@ -1,39 +1,45 @@
 // src/views/ExternalApi.js
-
-import React, { useState } from "react";
+import { useMutation } from '@apollo/react-hooks';
+import React from "react";
+import { graphql } from 'react-apollo'
+import { userQuery, addUser } from '../queries/queries'
 import { useAuth0 } from "../react-auth0-spa";
 
-const ExternalApi = () => {
-    const [showResult, setShowResult] = useState(false);
-    const [apiMessage, setApiMessage] = useState("");
-    const { getTokenSilently } = useAuth0();
+const ExternalApi = (props) => {
 
-    const callApi = async () => {
-        try {
-            const token = await getTokenSilently();
 
-            const response = await fetch("https://ematestbe.herokuapp.com/", {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
 
-            const responseData = await response.json();
+    const displayUsers = () => {
+        var data = props.data
 
-            setShowResult(true);
-            setApiMessage(responseData);
-        } catch (error) {
-            console.error(error);
+        if (data.loading) {
+            return <div>is loading</div>
+        } else {
+            return data.user.map(user => {
+                return (
+                    <>
+                        <li>{user.name}</li>
+                        <li>{user.sub}</li>
+
+                    </>
+                )
+            })
         }
-    };
+    }
 
+    // to add a user
+    const { loading, user } = useAuth0();
+    const [addUserWithSub, { data }] = useMutation(addUser);
     return (
-        <>
-            <h1>External API</h1>
-            <button onClick={callApi}>Ping API</button>
-            {showResult && <code>{JSON.stringify(apiMessage, null, 2)}</code>}
-        </>
+        <div>
+            <ul>
+                {displayUsers()}
+            </ul>
+            <button onClick={() => addUserWithSub({ variables: { name: user.email, sub: "over write me" } })}>add a user</button>
+        </div>
+
     );
 };
 
-export default ExternalApi;
+export default graphql(userQuery)(ExternalApi)
+
